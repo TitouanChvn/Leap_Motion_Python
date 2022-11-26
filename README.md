@@ -14,5 +14,7 @@ The Python API requires that we use python 2.7 as latest versions are not suppor
 
 
 In this example we will first see how to gather data for each hand on each frame taken by the controller.
+
 The data we are looking for are hand number, hand position, finger number, finger position, normal vector to the hand and more.
+
 The function to access this informations are described in the Leap API documentation 
