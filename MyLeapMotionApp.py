@@ -1,10 +1,18 @@
 import sys, Leap, time
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
-class SampleListener(Leap.Listener):
+
+
+
+
+
+class MyListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
+    
 
     def on_init(self, controller):
         print("Initialized")
@@ -18,12 +26,19 @@ class SampleListener(Leap.Listener):
         controller.enable_gesture(Leap.Gesture.TYPE_SCREEN_TAP);
         controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
 
+        
+
     def on_disconnect(self, controller):
         # Note: not dispatched when running in a debugger.
         print("Disconnected")
 
     def on_exit(self, controller):
         print("Exited")
+
+    def get_frame(self, controller):
+        frame = controller.frame()
+        return frame
+    
 
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
@@ -79,8 +94,27 @@ class SampleListener(Leap.Listener):
 
 def main():
     # Create a sample listener and controller
-    listener = SampleListener()
+    listener = MyListener()
     controller = Leap.Controller()
+
+    #Create elements for visualization
+    Visalization = plt.figure()
+    ax = Visalization.add_subplot(111)
+    xdata, ydata = [], []
+
+    index=1
+    def animate(i):
+        current_frame = listener.get_frame(controller)
+        print(current_frame.hands)
+        xdata = i
+        ydata = i
+        ax.cla()
+        ax.plot(xdata, ydata,'ro')
+        i+=1
+    
+    ani = FuncAnimation(Visalization, animate, interval=1000)
+
+    
 
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
@@ -88,6 +122,7 @@ def main():
     # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     try:
+        plt.show()
         sys.stdin.readline()
     except KeyboardInterrupt:
         pass
