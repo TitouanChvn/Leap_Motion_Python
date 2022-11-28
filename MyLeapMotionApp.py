@@ -1,10 +1,17 @@
 import sys, Leap, time
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+import pygame
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
+#Visualize parameters
+
+WIDTH=800
+HEIGHT=600
+fps = 60
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
 
 
+#Normalizing the Leap coordinates
 
 
 
@@ -90,45 +97,45 @@ class MyListener(Leap.Listener):
 """
 
 
-
-
 def main():
     # Create a sample listener and controller
     listener = MyListener()
     controller = Leap.Controller()
 
-    #Create elements for visualization
-    Visalization = plt.figure()
-    ax = Visalization.add_subplot(111)
-    xdata, ydata = [], []
-
-    index=1
-    def animate(i):
-        current_frame = listener.get_frame(controller)
-        print(current_frame.hands)
-        xdata = i
-        ydata = i
-        ax.cla()
-        ax.plot(xdata, ydata,'ro')
-        i+=1
-    
-    ani = FuncAnimation(Visalization, animate, interval=1000)
-
-    
-
+            
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
-
+    
     # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     try:
-        plt.show()
+        #Launch pygame for visualization
+        pygame.init()
+        run=True
+        while run :
+            clock.tick(fps)
+            #get hand position from frame
+            x=listener.get_frame(controller).hands[0].palm_position[0]
+            y=listener.get_frame(controller).hands[0].palm_position[1]
+            pygame.draw.circle(screen, (255, 0, 0), (x, y), 20)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    pygame.quit()
+                    continue
+            try :   #if pygame is launched, update the frame
+                pygame.display.flip()
+            except :
+                pass
+
+        #and not (sys.stdin.readline())
         sys.stdin.readline()
     except KeyboardInterrupt:
         pass
     finally :
         # Remove the sample listener when done
         controller.remove_listener(listener)
+        pygame.quit()
 
 
 if __name__ == "__main__":
