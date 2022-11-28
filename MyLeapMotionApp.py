@@ -12,7 +12,31 @@ clock = pygame.time.Clock()
 
 
 #Normalizing the Leap coordinates
+Leap_start_x=-300
+Leap_end_x=300
+Leap_start_y=0
+Leap_end_y=700
+Leap_start_z=-300
+Leap_end_z=300
+Leap_range_x=Leap_end_x-Leap_start_x
+Leap_range_y=Leap_end_y-Leap_start_y
+Leap_range_z=Leap_end_z-Leap_start_z
+App_start_x=-1
+App_end_x=1
+App_start_y=0
+App_end_y=1
+App_start_z=-1
+App_end_z=1
+App_range_x=App_end_x-App_start_x
+App_range_y=App_end_y-App_start_y
+App_range_z=App_end_z-App_start_z
 
+
+def normalize(x_Leap, y_Leap, z_Leap):
+    x_App=App_start_x+(x_Leap-Leap_start_x)*App_range_x/Leap_range_x
+    y_App=App_start_y+(y_Leap-Leap_start_y)*App_range_y/Leap_range_y
+    z_App=App_start_z+(z_Leap-Leap_start_z)*App_range_z/Leap_range_z
+    return x_App, y_App, z_App
 
 
 class MyListener(Leap.Listener):
@@ -50,7 +74,7 @@ class MyListener(Leap.Listener):
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
         
-        time.sleep(1)
+        #time.sleep(0.1)
         frame = controller.frame()
         print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
               frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
@@ -117,7 +141,14 @@ def main():
             #get hand position from frame
             x=listener.get_frame(controller).hands[0].palm_position[0]
             y=listener.get_frame(controller).hands[0].palm_position[1]
-            pygame.draw.circle(screen, (255, 0, 0), (x, y), 20)
+            z=listener.get_frame(controller).hands[0].palm_position[2]
+            x,y,z=normalize(x,y,z)
+            #print(x,y,z)
+            x_display=int((x+1)*WIDTH/2)
+            y_display=int((y+1)*HEIGHT/2)
+            z_display=int((z+1)*HEIGHT/2)
+            screen.fill((0,0,0))
+            pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
