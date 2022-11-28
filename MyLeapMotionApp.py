@@ -4,10 +4,10 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 #Visualize parameters
 
-WIDTH=1200
-HEIGHT=800
+WIDTH=800
+HEIGHT=600
 fps = 120
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT),pygame.RESIZABLE)
 clock = pygame.time.Clock()
 
 
@@ -153,6 +153,14 @@ def main():
                     run = False
                     pygame.quit()
                     continue
+                if event.type == pygame.VIDEORESIZE:
+                    global screen
+                    global WIDTH , HEIGHT
+                    WIDTH = event.w
+                    HEIGHT = event.h
+                    #screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+                #    screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
+                    pygame.display.update()
             try :   #if pygame is launched, update the frame
                 pygame.display.flip()
             except :
