@@ -4,9 +4,9 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 #Visualize parameters
 
-WIDTH=800
-HEIGHT=600
-fps = 60
+WIDTH=1200
+HEIGHT=800
+fps = 120
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
@@ -30,7 +30,6 @@ App_end_z=1
 App_range_x=App_end_x-App_start_x
 App_range_y=App_end_y-App_start_y
 App_range_z=App_end_z-App_start_z
-
 
 def normalize(x_Leap, y_Leap, z_Leap):
     x_App=App_start_x+(x_Leap-Leap_start_x)*App_range_x/Leap_range_x
@@ -136,7 +135,7 @@ def main():
         #Launch pygame for visualization
         pygame.init()
         run=True
-        while run :
+        while run:
             clock.tick(fps)
             #get hand position from frame
             x=listener.get_frame(controller).hands[0].palm_position[0]
