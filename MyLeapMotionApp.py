@@ -1,14 +1,34 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
 import sys, Leap, time
 import pygame
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
-#Visualize parameters
+#different options :
+print_frame = False
+visualize = False
+#read from communication.txt to know what option to use
+f=open("communication.txt","r")
+print_frame
+visualize
+num=f.read()
+if num=="1":
+    visualize = True
+elif num=="2":
+    print_frame = True
+elif num=="3":
+    print_frame = True
+    visualize = True
 
-WIDTH=800
-HEIGHT=600
-fps = 120
-screen = pygame.display.set_mode((WIDTH, HEIGHT),pygame.RESIZABLE)
-clock = pygame.time.Clock()
+#Visualize parameters
+if visualize:
+    WIDTH = 500
+    HEIGHT = 500
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    clock = pygame.time.Clock()
+    fps = 60
+
 
 
 #Normalizing the Leap coordinates
@@ -75,8 +95,11 @@ class MyListener(Leap.Listener):
         
         #time.sleep(0.1)
         frame = controller.frame()
-        print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
-              frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
+        global print_frame
+        if print_frame:
+            print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
+                  frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
+        
 
         """
         # Get hands
@@ -121,10 +144,14 @@ class MyListener(Leap.Listener):
 
 
 def main():
+    global visualize
+    
+    
+
     # Create a sample listener and controller
     listener = MyListener()
     controller = Leap.Controller()
-
+    global WIDTH , HEIGHT
             
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
@@ -132,39 +159,39 @@ def main():
     # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     try:
+        print(visualize)
+        if visualize:
         #Launch pygame for visualization
-        pygame.init()
-        run=True
-        while run:
-            clock.tick(fps)
-            #get hand position from frame
-            x=listener.get_frame(controller).hands[0].palm_position[0]
-            y=listener.get_frame(controller).hands[0].palm_position[1]
-            z=listener.get_frame(controller).hands[0].palm_position[2]
-            x,y,z=normalize(x,y,z)
-            #print(x,y,z)
-            x_display=int((x+1)*WIDTH/2)
-            y_display=int((y+1)*HEIGHT/2)
-            z_display=int((z+1)*HEIGHT/2)
-            screen.fill((0,0,0))
-            pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-                    pygame.quit()
-                    continue
-                if event.type == pygame.VIDEORESIZE:
-                    global screen
-                    global WIDTH , HEIGHT
-                    WIDTH = event.w
-                    HEIGHT = event.h
-                    #screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
-                #    screen = pygame.display.set_mode((event.w, event.h),pygame.RESIZABLE)
-                    pygame.display.update()
-            try :   #if pygame is launched, update the frame
-                pygame.display.flip()
-            except :
-                pass
+            pygame.init()
+            run=True
+            while run:
+                clock.tick(fps)
+                screen.fill((0,0,0))
+                #get hand position from frame
+                for hand in listener.get_frame(controller).hands:
+                    x=hand.palm_position[0]
+                    y=hand.palm_position[1]
+                    z=hand.palm_position[2]
+                    x,y,z=normalize(x,y,z)
+                    #print(x,y,z)
+                    x_display=int((x+1)*WIDTH/2)
+                    y_display=int((y+1)*HEIGHT/2)
+                    z_display=int((z+1)*HEIGHT/2)
+
+                    pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                        pygame.quit()
+                        continue
+                    if event.type == pygame.VIDEORESIZE:  
+                        WIDTH = event.w
+                        HEIGHT = event.h
+                        pygame.display.update()
+                try :   #if pygame is launched, update the frame
+                    pygame.display.flip()
+                except :
+                    pass
 
         #and not (sys.stdin.readline())
         sys.stdin.readline()
@@ -173,7 +200,8 @@ def main():
     finally :
         # Remove the sample listener when done
         controller.remove_listener(listener)
-        pygame.quit()
+        if visualize:
+            pygame.quit()
 
 
 if __name__ == "__main__":
