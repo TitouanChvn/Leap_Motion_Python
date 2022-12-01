@@ -27,6 +27,9 @@ questions = [
             },
             {
                 'name': 'terminal frame print'
+            },
+            {
+                'name': 'move mouse'
             }
         ],
         'validate': lambda answer: 'Select an element.' \
@@ -40,9 +43,11 @@ answers = prompt(questions, style=style)
 #open communication.txt
 file = open("communication.txt", "w")
 #write the answer in the file
-num=0
+#num=0
 if 'Pygame visualization' in answers['elements']:
-    num+=1
+    file.write("1")
 if 'terminal frame print' in answers['elements']:
-    num+=2
-file.write(str(num))
+    file.write("2")
+if 'move mouse' in answers['elements']:
+    file.write("3")
+file.close()

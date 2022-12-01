@@ -1,6 +1,7 @@
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-
+import keyboard
+import pyautogui
 import sys, Leap, time
 import pygame
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
@@ -8,19 +9,17 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 #different options :
 print_frame = False
 visualize = False
+move_mouse = False
 #read from communication.txt to know what option to use
 f=open("communication.txt","r")
-print_frame
-visualize
 num=f.read()
-if num=="1":
+if '1' in num:
     visualize = True
-elif num=="2":
+if '2' in num:
     print_frame = True
-elif num=="3":
-    print_frame = True
-    visualize = True
-
+if '3' in num:
+    move_mouse = True
+print([visualize, print_frame, move_mouse])
 #Visualize parameters
 if visualize:
     WIDTH = 500
@@ -96,6 +95,7 @@ class MyListener(Leap.Listener):
         #time.sleep(0.1)
         frame = controller.frame()
         global print_frame
+        #print(print_frame)
         if print_frame:
             print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
                   frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
@@ -142,16 +142,68 @@ class MyListener(Leap.Listener):
 
 """
 
+def visualize_func(controller,listener):
+    global WIDTH , HEIGHT
+    global run
+    clock.tick(fps)
+    screen.fill((0,0,0))
+    #get hand position from frame
+    for hand in listener.get_frame(controller).hands:
+        x=hand.palm_position[0]
+        y=hand.palm_position[1]
+        z=hand.palm_position[2]
+        x,y,z=normalize(x,y,z)
+        #print(x,y,z)
+        x_display=int((x+1)*WIDTH/2)
+        y_display=int((y+1)*HEIGHT/2)
+        z_display=int((z+1)*HEIGHT/2)
+        pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+            pygame.quit()
+            continue
+        if event.type == pygame.VIDEORESIZE:  
+            WIDTH = event.w
+            HEIGHT = event.h
+            pygame.display.update()
+    try :   #if pygame is launched, update the frame
+        pygame.display.flip()
+    except :
+        pass
+
+
+def move_mouse_to(controller,listener):  #On devrait plutot utiliser du move_relative
+    global run   
+    screenx=pyautogui.size()[0]
+    screeny=pyautogui.size()[1]
+    for hand in listener.get_frame(controller).hands:
+        x=hand.palm_position[0]
+        y=hand.palm_position[1]
+        z=hand.palm_position[2]
+        x,y,z=normalize(x,y,z)
+        x_display=int((x+1)*screenx/2)
+        y_display=int((z+1)*screeny/2)
+        pyautogui.moveTo(x_display,y_display,duration=0.05)
+    if keyboard.is_pressed('Enter'):
+        run = False
+    
+
+    
+        
+    
+
+
+
+run=True
 
 def main():
     global visualize
-    
-    
-
+    global run
     # Create a sample listener and controller
     listener = MyListener()
     controller = Leap.Controller()
-    global WIDTH , HEIGHT
+    
             
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
@@ -159,41 +211,18 @@ def main():
     # Keep this process running until Enter is pressed
     print("Press Enter to quit...")
     try:
-        print(visualize)
+        #print(visualize)
         if visualize:
         #Launch pygame for visualization
             pygame.init()
-            run=True
-            while run:
-                clock.tick(fps)
-                screen.fill((0,0,0))
-                #get hand position from frame
-                for hand in listener.get_frame(controller).hands:
-                    x=hand.palm_position[0]
-                    y=hand.palm_position[1]
-                    z=hand.palm_position[2]
-                    x,y,z=normalize(x,y,z)
-                    #print(x,y,z)
-                    x_display=int((x+1)*WIDTH/2)
-                    y_display=int((y+1)*HEIGHT/2)
-                    z_display=int((z+1)*HEIGHT/2)
-
-                    pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
-                        pygame.quit()
-                        continue
-                    if event.type == pygame.VIDEORESIZE:  
-                        WIDTH = event.w
-                        HEIGHT = event.h
-                        pygame.display.update()
-                try :   #if pygame is launched, update the frame
-                    pygame.display.flip()
-                except :
-                    pass
-
-        #and not (sys.stdin.readline())
+        
+        while run:
+            if visualize:
+                visualize_func(controller,listener)
+            if move_mouse:
+                move_mouse_to(controller,listener)
+            if not True in [visualize,move_mouse]:
+                run=False
         sys.stdin.readline()
     except KeyboardInterrupt:
         pass
