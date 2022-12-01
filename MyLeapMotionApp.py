@@ -34,7 +34,7 @@ if visualize:
 Leap_start_x=-300
 Leap_end_x=300
 Leap_start_y=0
-Leap_end_y=700
+Leap_end_y=600
 Leap_start_z=-300
 Leap_end_z=300
 Leap_range_x=Leap_end_x-Leap_start_x
@@ -75,7 +75,15 @@ class MyListener(Leap.Listener):
         controller.enable_gesture(Leap.Gesture.TYPE_SCREEN_TAP);
         controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
 
-        
+        controller.config.set("Gesture.ScreenTap.MinForwardVelocity", 3.0)
+        controller.config.set("Gesture.ScreenTap.HistorySeconds", .1)
+        controller.config.set("Gesture.ScreenTap.MinDistance", 0.2)
+        controller.config.save()
+
+        controller.config.set("Gesture.KeyTap.MinDownVelocity", 15.0)
+        controller.config.set("Gesture.KeyTap.HistorySeconds", .1)
+        controller.config.set("Gesture.KeyTap.MinDistance", 0.05)
+        controller.config.save()
 
     def on_disconnect(self, controller):
         # Note: not dispatched when running in a debugger.
@@ -100,6 +108,25 @@ class MyListener(Leap.Listener):
             print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
                   frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
         
+
+        for gesture in frame.gestures():
+            #if gesture.type == Leap.Gesture.TYPE_SCREEN_TAP:
+            #    screen_tap = ScreenTapGesture(gesture)
+            #    print("Screen Tap id: %d, %s, position: %s, direction: %s" % (
+            #          gesture.id, self.state_names[gesture.state],
+            #          screen_tap.position, screen_tap.direction))
+            #    #pyautogui.click()
+            #    #print("Click")
+            if gesture.type == Leap.Gesture.TYPE_KEY_TAP:
+                key_tap = KeyTapGesture(gesture)
+                print("Key Tap id: %d, %s, position: %s, direction: %s" % (
+                      gesture.id, self.state_names[gesture.state],
+                      key_tap.position, key_tap.direction))
+                #pyautogui.click()
+                #print("Click")
+
+            
+
 
         """
         # Get hands
@@ -177,13 +204,15 @@ def move_mouse_to(controller,listener):  #On devrait plutot utiliser du move_rel
     global run   
     screenx=pyautogui.size()[0]
     screeny=pyautogui.size()[1]
-    for hand in listener.get_frame(controller).hands:
-        x=hand.palm_position[0]
-        y=hand.palm_position[1]
-        z=hand.palm_position[2]
+    if not listener.get_frame(controller).hands:
+        pass
+    else :
+        x=listener.get_frame(controller).hands[0].palm_position[0]
+        y=listener.get_frame(controller).hands[0].palm_position[1]
+        z=listener.get_frame(controller).hands[0].palm_position[2]
         x,y,z=normalize(x,y,z)
         x_display=int((x+1)*screenx/2)
-        y_display=int((z+1)*screeny/2)
+        y_display=int((1-y)*screeny)
         pyautogui.moveTo(x_display,y_display,duration=0.05)
     if keyboard.is_pressed('Enter'):
         run = False
