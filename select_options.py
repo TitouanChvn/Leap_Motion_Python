@@ -23,13 +23,16 @@ questions = [
         'choices': [
             Separator('= Choices ='),
             {
-                'name': 'Pygame visualization'
+                'name': 'Pygame visualization x & z'
             },
             {
-                'name': 'terminal frame print'
+                'name': 'Pygame visualization x & y'
             },
             {
                 'name': 'move mouse'
+            },
+            {
+                'name': 'terminal frame print'
             }
         ],
         'validate': lambda answer: 'Select an element.' \
@@ -44,10 +47,12 @@ answers = prompt(questions, style=style)
 file = open("communication.txt", "w")
 #write the answer in the file
 #num=0
-if 'Pygame visualization' in answers['elements']:
+if 'Pygame visualization x & z' in answers['elements']:
     file.write("1")
-if 'terminal frame print' in answers['elements']:
+if 'Pygame visualization x & y' in answers['elements']:
     file.write("2")
 if 'move mouse' in answers['elements']:
     file.write("3")
+if 'terminal frame print' in answers['elements']:
+    file.write("4")
 file.close()

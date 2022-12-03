@@ -8,23 +8,26 @@ from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 #different options :
 print_frame = False
-visualize = False
+visualize_xz = False
+visualize_xy = False
 move_mouse = False
 #read from communication.txt to know what option to use
 f=open("communication.txt","r")
 num=f.read()
 if '1' in num:
-    visualize = True
+    visualize_xz = True
 if '2' in num:
-    print_frame = True
+    visualize_xy = True
 if '3' in num:
     move_mouse = True
-print([visualize, print_frame, move_mouse])
+if '4' in num:
+    print_frame = True
+print([visualize_xz, visualize_xy, move_mouse,print_frame])
 #Visualize parameters
-if visualize:
+if visualize_xz :
     WIDTH = 500
     HEIGHT = 500
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    screen_xz = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     clock = pygame.time.Clock()
     fps = 60
 
@@ -33,8 +36,8 @@ if visualize:
 #Normalizing the Leap coordinates
 Leap_start_x=-300
 Leap_end_x=300
-Leap_start_y=0
-Leap_end_y=600
+Leap_start_y=120
+Leap_end_y=500
 Leap_start_z=-300
 Leap_end_z=300
 Leap_range_x=Leap_end_x-Leap_start_x
@@ -128,52 +131,11 @@ class MyListener(Leap.Listener):
             
 
 
-        """
-        # Get hands
-        for hand in frame.hands:
-
-            handType = "Left hand" if hand.is_left else "Right hand"
-
-            print("  %s, id %d, position: %s" % (
-                handType, hand.id, hand.palm_position))
-
-            # Get the hand's normal vector and direction
-            normal = hand.palm_normal
-            direction = hand.direction
-
-            # Calculate the hand's pitch, roll, and yaw angles
-            print("  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
-                direction.pitch * Leap.RAD_TO_DEG,
-                normal.roll * Leap.RAD_TO_DEG,
-                direction.yaw * Leap.RAD_TO_DEG))
-
-            # Get arm bone
-            arm = hand.arm
-            print("  Arm direction: %s, wrist position: %s, elbow position: %s" % (
-                arm.direction,
-                arm.wrist_position,
-                arm.elbow_position))
-
-            # Get fingers
-            for finger in hand.fingers:
-
-                print
-
-                print("    %s finger, id: %d, length: %fmm, width: %fmm" % (
-                    self.finger_names[finger.type],
-                    finger.id,
-                    finger.length,
-                    finger.width))
-
-
-
-"""
-
-def visualize_func(controller,listener):
+def visualize_xz_func(controller,listener):
     global WIDTH , HEIGHT
     global run
     clock.tick(fps)
-    screen.fill((0,0,0))
+    screen_xz.fill((0,0,0))
     #get hand position from frame
     for hand in listener.get_frame(controller).hands:
         x=hand.palm_position[0]
@@ -182,9 +144,8 @@ def visualize_func(controller,listener):
         x,y,z=normalize(x,y,z)
         #print(x,y,z)
         x_display=int((x+1)*WIDTH/2)
-        y_display=int((y+1)*HEIGHT/2)
         z_display=int((z+1)*HEIGHT/2)
-        pygame.draw.circle(screen, (255, 0, 0), (x_display, z_display), 5)
+        pygame.draw.circle(screen_xz, (255, 0, 0), (x_display, z_display), 5)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -227,7 +188,7 @@ def move_mouse_to(controller,listener):  #On devrait plutot utiliser du move_rel
 run=True
 
 def main():
-    global visualize
+    global visualize_xz
     global run
     # Create a sample listener and controller
     listener = MyListener()
@@ -241,16 +202,16 @@ def main():
     print("Press Enter to quit...")
     try:
         #print(visualize)
-        if visualize:
+        if visualize_xz:
         #Launch pygame for visualization
             pygame.init()
         
         while run:
-            if visualize:
-                visualize_func(controller,listener)
+            if visualize_xz:
+                visualize_xz_func(controller,listener)
             if move_mouse:
                 move_mouse_to(controller,listener)
-            if not True in [visualize,move_mouse]:
+            if not True in [visualize_xz,move_mouse]:
                 run=False
         sys.stdin.readline()
     except KeyboardInterrupt:
@@ -258,7 +219,7 @@ def main():
     finally :
         # Remove the sample listener when done
         controller.remove_listener(listener)
-        if visualize:
+        if visualize_xz:
             pygame.quit()
 
 
