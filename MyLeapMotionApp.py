@@ -26,6 +26,7 @@ if '4' in num:
 if '5' in num:
     print_frame = True
 print([visualize_xz, visualize_xy, move_mouse,move_mouse_relative,print_frame])
+
 #Visualize parameters
 if visualize_xz :
     WIDTH = 500
@@ -38,6 +39,22 @@ if visualize_xz :
 if move_mouse or move_mouse_relative:
     pyautogui.FAILSAFE = False
     pyautogui.PAUSE = 0
+
+# A record of the last 60 frames
+class FrameHistory(object):
+    def __init__(self):
+        self.frames = []
+        self.max_frames = 60
+
+    def add(self, frame):
+        self.frames.append(frame)
+        if len(self.frames) > self.max_frames:
+            self.frames.pop(0)
+
+    def get(self):
+        return self.frames
+
+MyFrameHistory = FrameHistory() 
 
 #Normalizing the Leap coordinates
 Leap_start_x=-300
@@ -113,11 +130,13 @@ class MyListener(Leap.Listener):
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
         global frame_count
+        global MyFrameHistory
+        
         frame_count+=1
         #time.sleep(0.1)
         frame = controller.frame()
+        MyFrameHistory.add(frame=frame)
         global print_frame
-        #print(print_frame)
         if print_frame:
             print("Frame id: %d, timestamp: %d, hands: %d, fingers: %d, tools: %d, gestures %d" % (
                   frame.id, frame.timestamp, len(frame.hands), len(frame.fingers), len(frame.tools), len(frame.gestures())))
@@ -224,7 +243,10 @@ def move_mouse_relative_func(controller,listener):
         run = False
         
     
-
+def recognize_gesture(controller,listener):
+    global MyFrameHistory
+    if not listener.get_frame(controller).hands :
+        pass
 
 
 run=True
