@@ -32,6 +32,9 @@ questions = [
                 'name': 'move mouse'
             },
             {
+                'name': 'move_mouse_relative'
+            },
+            {
                 'name': 'terminal frame print'
             }
         ],
@@ -53,6 +56,8 @@ if 'Pygame visualization x & y' in answers['elements']:
     file.write("2")
 if 'move mouse' in answers['elements']:
     file.write("3")
-if 'terminal frame print' in answers['elements']:
+if 'move_mouse_relative' in answers['elements']:
     file.write("4")
+if 'terminal frame print' in answers['elements']:
+    file.write("5")
 file.close()
