@@ -5,6 +5,7 @@ import pyautogui
 import sys, Leap, time
 import pygame
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
+import create_keyboard
 
 #different options :
 print_frame = False
@@ -29,7 +30,7 @@ print([visualize_xz, visualize_xy, move_mouse,move_mouse_relative,print_frame])
 
 #Visualize parameters
 if visualize_xz :
-    WIDTH = 500
+    WIDTH = 700
     HEIGHT = 500
     screen_xz = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     clock = pygame.time.Clock()
@@ -175,9 +176,18 @@ class MyListener(Leap.Listener):
 def visualize_xz_func(controller,listener):
     global WIDTH , HEIGHT
     global run
+    keyboard_width=WIDTH*0.8
+    keyboard_height=keyboard_width/3
+    keyboard_coordinates , keyboard_index = create_keyboard.create_keyboard(keyboard_width,keyboard_height,50,50)
     clock.tick(fps)
     screen_xz.fill((0,0,0))
     #get hand position from frame
+
+    for carre in keyboard_coordinates:
+        # Drawing Rectangle
+        color=(0,255,0)
+        pygame.draw.rect(screen_xz, color, pygame.Rect(carre),  2)
+
     for hand in listener.get_frame(controller).hands:
         x=hand.palm_position[0]
         y=hand.palm_position[1]
