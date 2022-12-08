@@ -107,9 +107,9 @@ class MyListener(Leap.Listener):
         controller.config.set("Gesture.ScreenTap.MinDistance", 0.2)
         controller.config.save()
 
-        controller.config.set("Gesture.KeyTap.MinDownVelocity", 15.0)
-        controller.config.set("Gesture.KeyTap.HistorySeconds", .1)
-        controller.config.set("Gesture.KeyTap.MinDistance", 0.05)
+        controller.config.set("Gesture.KeyTap.MinDownVelocity", 40.0)
+        controller.config.set("Gesture.KeyTap.HistorySeconds", .3)
+        controller.config.set("Gesture.KeyTap.MinDistance", 0.3)
         controller.config.save()
 
         controller.config.set("Gesture.Swipe.MinLength", 4000.0)
@@ -187,6 +187,16 @@ def visualize_xz_func(controller,listener):
         # Drawing Rectangle
         color=(0,255,0)
         pygame.draw.rect(screen_xz, color, pygame.Rect(carre),  2)
+    
+    for finger in listener.get_frame(controller).fingers:
+        x=finger.tip_position[0]
+        y=finger.tip_position[1]
+        z=finger.tip_position[2]
+        x,y,z=normalize(x,y,z)
+        #print(x,y,z)
+        x_display=int((x+1)*WIDTH/2)
+        z_display=int((z+1)*HEIGHT/2)
+        pygame.draw.circle(screen_xz, (0, 0, 255), (x_display, z_display), 5)
 
     for hand in listener.get_frame(controller).hands:
         x=hand.palm_position[0]
@@ -197,6 +207,26 @@ def visualize_xz_func(controller,listener):
         x_display=int((x+1)*WIDTH/2)
         z_display=int((z+1)*HEIGHT/2)
         pygame.draw.circle(screen_xz, (255, 0, 0), (x_display, z_display), 5)
+    
+    for gesture in listener.get_frame(controller).gestures():
+        if gesture.type == Leap.Gesture.TYPE_KEY_TAP:
+            key_tap = KeyTapGesture(gesture)
+            x=key_tap.position[0]
+            y=key_tap.position[1]
+            z=key_tap.position[2]
+            x,y,z=normalize(x,y,z)
+            #print(x,y,z)
+            x_display=int((x+1)*WIDTH/2)
+            z_display=int((z+1)*HEIGHT/2)
+            pygame.draw.circle(screen_xz, (255, 255, 0), (x_display, z_display), 10)
+            pos = (x_display, z_display)
+            for i in range(len(keyboard_coordinates)):
+                ele=keyboard_coordinates[i]
+                if ele[0]-10 < pos[0] < ele[0]+ele[2]+10 and ele[1]-10 < pos[1] < ele[1]+ele[3]+10:
+                    print("clicked on", keyboard_index[i])
+                    pygame.draw.rect(screen_xz, color, pygame.Rect(ele))
+                    break
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
