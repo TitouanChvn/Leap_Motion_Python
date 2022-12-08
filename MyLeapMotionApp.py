@@ -206,6 +206,14 @@ def visualize_xz_func(controller,listener):
             WIDTH = event.w
             HEIGHT = event.h
             pygame.display.update()
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            for i in range(len(keyboard_coordinates)):
+                ele=keyboard_coordinates[i]
+                if ele[0] < pos[0] < ele[0]+ele[2] and ele[1] < pos[1] < ele[1]+ele[3]:
+                    print("clicked on", keyboard_index[i])
+                    pygame.draw.rect(screen_xz, color, pygame.Rect(ele))
+                    break
     try :   #if pygame is launched, update the frame
         pygame.display.flip()
     except :
